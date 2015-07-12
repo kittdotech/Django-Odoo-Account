@@ -1,0 +1,43 @@
+html, body
+{
+    #height:100%;
+    width:100%;
+    margin:0;
+    padding:0;
+
+    background-color: #cccccc;
+}
+
+
+#header
+{
+background-color:lightsteelblue;
+height:150px;
+    text-align:center;
+}
+
+#title
+{
+height:120px;
+font-size:22px;
+}
+#menu
+{
+height:30px;
+
+}
+#content
+{
+background-color: #cccccc;
+    height:auto;
+}
+a {text-decoration: none;
+
+}
+#info
+{
+    padding-top: 50px;
+}#extra
+{
+    text-align:center;
+}

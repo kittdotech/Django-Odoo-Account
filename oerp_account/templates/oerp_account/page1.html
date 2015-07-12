@@ -1,0 +1,284 @@
+{% extends "oerp_account/index.html" %}
+{% block scriptblock %}
+    <script>
+jQuery(document).ready(function() {
+
+    $(document).on('click', '.Login',function(e) {
+
+var ouser=document.getElementById("odoouser").value;
+var opass=parseInt(document.getElementById("odoopass").value);
+        var odb=document.getElementById("odoodb").value;
+
+
+$.ajax({
+        type: "POST",
+        url: "odoologin",
+        data: {
+            csrfmiddlewaretoken:'{{csrf_token}}',
+            odoouser:ouser,
+            odoopass:opass,
+            odoodb:odb,
+
+        },
+        success: function(result) {
+console.log(result);
+            if (result['status'])
+            {
+                logstr='Connnected to Odoo as '+ result['odoousername']+ ' (<a href="logout" class="Logout">Change</a>)';
+
+
+                document.getElementById("info").innerHTML=logstr;
+                 document.getElementById("extra").innerHTML="";
+
+            }
+            else
+            {
+                console.log(result);
+            document.getElementById("extra").innerHTML="Please provide the correct Username & Password";
+            }
+
+    },
+        error: function(err) {
+    }
+});
+    });
+    $(document).on('click', '.Create',function(e) {
+    document.getElementById("extra").innerHTML="Please Wait....";
+var acode=document.getElementById("acccode").value;
+var aname=document.getElementById("accname").value;
+var atype=document.getElementById("accinttype").value;
+var ausertype=document.getElementById("acctype").value;
+        $.ajax({
+        type: "GET",
+        url: "odoocreatenew",
+        data: {
+
+            code:acode,
+            name:aname,
+            type:atype,
+            user_type:ausertype,
+
+        },
+        success: function(result) {
+
+            if (result['status'])
+            {
+                logstr="Sucessfully created the accounts";
+                document.getElementById("info").innerHTML=logstr;
+                document.getElementById("extra").innerHTML="";
+            }
+            else
+            {
+            document.getElementById("extra").innerHTML=result['details'];
+
+            }
+
+    },
+        error: function(err) {
+    }
+});
+
+    });
+    $(document).on('click', '.Connect',function(e) {
+ document.getElementById("extra").innerHTML="Please Wait...";
+var osrv=document.getElementById("odooserver").value;
+var oport=parseInt(document.getElementById("odooport").value);
+
+$.ajax({
+        type: "GET",
+        url: "odooconnect",
+        data: {
+
+            odooserver:osrv,
+            odooport:oport,
+
+        },
+        success: function(result) {
+
+            if (result['status'])
+            {
+                logstr='<table align="center" valign="middle">';
+                strdblst='<select id="odoodb">';
+for(k=0 ; k < result['dblist'].length;k++) {
+strdblst+='<option value="'+result["dblist"][k]+'">'+result["dblist"][k]+'</option>';
+
+}
+                strdblst+='</select>';
+                logstr+='<tr><td>Select Database</td><td>'+strdblst+'</td></tr>';
+                logstr+='<tr><td>Enter Odoo Username</td><td><input type="text" id="odoouser"/></td></tr>';
+                logstr+='<tr><td>Enter Odoo Password</td><td><input type="password" id="odoopass"/></td></tr>';
+                logstr+='<td colspan="2"><input type="button" value="Login" class="Login" id="odoologin"/></td>';
+                logstr+='</table>';
+                document.getElementById("extra").innerHTML=logstr;
+            }
+            else
+            {
+            document.getElementById("extra").innerHTML="Please provide the correct server & port";
+
+            }
+
+
+    },
+        error: function(err) {
+
+
+    }
+});
+    });
+
+
+    $(document).on('click', '.menu',function(e) {
+menu_clicked=$(this).attr("value");
+
+        if (menu_clicked=='mnulog')
+        {
+         $.ajax({
+        type: "GET",
+        url: "islogin",
+        success: function(result) {
+console.log(result);
+            if (result['status'])
+            {
+                 logstr='Connnected to Odoo as '+ result['odoousername']+ ' (<a href="logout" class="Logout">Change</a>)';
+
+                document.getElementById("info").innerHTML=logstr;
+            }
+            else
+            {
+                logstr='<table align="center" valign="middle">';
+                logstr+='<tr><td>Enter Odoo Server</td><td><input type="text" id="odooserver"/></td></tr>';
+                logstr+='<tr><td>Enter Odoo Server Port</td><td><input type="text" id="odooport"/></td></tr>';
+                logstr+='<td colspan="2"><input type="button" value="Connect" class="Connect" id="odooconnect"/></td>';
+                logstr+='</table>';
+
+                document.getElementById("info").innerHTML=logstr;
+
+            }
+
+
+    },
+        error: function(err) {
+
+
+    }
+});
+
+}
+        else if (menu_clicked=='mnulst')
+        {
+document.getElementById("info").innerHTML="Please Wait....";
+$.ajax({
+        type: "GET",
+        url: "odooacclst",
+        success: function(result) {
+
+            if (result['status'])
+            {
+
+                  logstr='<table align="center" valign="middle">';
+                $.each(result['list'], function (skey, svalue) {
+                logstr+=('<tr><td>'+skey+'</td><td>'+svalue+'</td></tr >');
+                });
+                logstr+='</table>';
+
+                document.getElementById("info").innerHTML=logstr;
+            }
+            else
+            {
+               logstr='Login to Odoo Accesss the codes';
+
+                document.getElementById("info").innerHTML=logstr;
+
+            }
+
+
+    },
+        error: function(err) {
+
+
+    }
+});
+
+
+        }
+
+    else if (menu_clicked=='mnunew')
+        {
+
+$.ajax({
+        type: "GET",
+        url: "odooaccnew",
+        success: function(result) {
+
+            if (result['status'])
+            {
+
+                inttype={'view':'View','other':'Regular','receivable':'Receivable','payable':'Payable','liquidity':'Liquidity','consolidation':'Consolidation','closed':'Closed'};
+                straccinttype='<select id="accinttype">';
+            $.each(inttype, function (skey, svalue) {
+                straccinttype+=('<option value="'+skey+'">'+svalue+'</option>');
+                });
+                stracctype='<select id="acctype">';
+            $.each(result['inttype'], function (skey, svalue) {
+                stracctype+=('<option value="'+skey+'">'+svalue+'</option>');
+                });
+
+                straccinttype+='</select>';
+                  logstr='<table align="center" valign="middle">';
+                logstr+='<tr><td>Enter Account Codes*</td><td><input type="text" id="acccode"/></td></tr>';
+                logstr+='<tr><td>Enter Account Name*</td><td><input type="text" id="accname"/></td></tr>';
+                logstr+='<tr><td>Enter Account Type*</td><td>'+stracctype+'</td></tr>';
+                logstr+='<tr><td>Enter Internal Type*</td><td>'+straccinttype+'</td></tr>';
+                logstr+='<tr><td colspan="2"><input type="button" value="Create" class="Create" id="Create"/></td></tr>';
+                logstr+='</table>';
+
+                document.getElementById("info").innerHTML=logstr;
+            }
+            else
+            {
+               logstr='Login to Odoo Create the codes';
+
+                document.getElementById("info").innerHTML=logstr;
+
+            }
+
+
+    },
+        error: function(err) {
+
+
+    }
+});
+        }
+
+});
+
+
+    $('#mnulog').click();
+});
+
+    </script>
+    {% endblock %}
+{% block header %}
+<div id="title">
+    Odoo Account Module Management
+</div>
+<div id="menu">
+<table width="100%">
+    <tr>
+        <td width="15%" align="left"><a href="#" class="menu" value="mnulst">List Accounts Codes</a></td>
+        <td width="20%" align="left"><a href="#" class="menu" value="mnunew">Create Account</a></td>
+        <td width="50%%" align="right"><a href="#" class="menu" id="mnulog" value="mnulog">Odoo Connection</a></td>
+    </tr>
+ </table>
+
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="info">
+</div>
+ <div id="extra">
+</div>
+
+{% endblock %}
